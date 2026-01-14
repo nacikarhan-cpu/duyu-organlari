@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYT Biyoloji: Duyu Organları | Etkileşimli Sınav</title>
+    <title>AYT Biyoloji: Duyu Organları | Etkileşimli Öğrenme</title>
     <style>
         :root {
             --primary-color: #2c3e50;
             --accent-color: #3498db;
             --success-color: #27ae60;
-            --warning-color: #f39c12;
+            --warning-color: #e67e22;
             --danger-color: #c0392b;
             --light-bg: #ecf0f1;
             --text-color: #333;
@@ -23,7 +23,6 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            user-select: none; /* Metin seçimini engelle, uygulama hissi ver */
         }
 
         /* Header */
@@ -33,39 +32,16 @@
             padding: 20px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: relative;
         }
 
-        header h1 { margin: 0; font-size: 1.8rem; }
-        header h2 { margin: 5px 0 0; font-size: 1rem; font-weight: 300; opacity: 0.9; }
-
-        /* Ses Butonu */
-        .sound-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.5);
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: 0.2s;
-            z-index: 100;
-        }
-        .sound-toggle:hover { background: rgba(255,255,255,0.4); }
+        header h1 { margin: 0; font-size: 2.2rem; }
+        header h2 { margin: 5px 0 0; font-size: 1.2rem; font-weight: 300; opacity: 0.9; }
 
         /* Main Container */
         .container {
             flex: 1;
-            width: 95%;
-            max-width: 800px;
-            margin: 20px auto;
+            max-width: 900px;
+            margin: 30px auto;
             padding: 20px;
             background: white;
             border-radius: 15px;
@@ -77,128 +53,113 @@
         /* Navigation Buttons (Home) */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 20px 10px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px 20px;
         }
 
         .menu-btn {
             background: white;
             border: 2px solid var(--accent-color);
             border-radius: 12px;
-            padding: 25px;
+            padding: 30px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            transition: all 0.3s ease;
             position: relative;
+            overflow: hidden;
         }
 
         .menu-btn:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
             background: var(--accent-color);
             color: white;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
         }
 
-        .menu-btn h3 { font-size: 1.3rem; margin: 0 0 10px 0; }
-        .menu-btn p { font-size: 0.9rem; margin: 0; opacity: 0.8; }
+        .menu-btn h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .menu-btn p { font-size: 0.9rem; opacity: 0.8; }
         
         /* Sections */
-        .section { display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .section.active { display: block; opacity: 1; }
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .active { display: block; }
 
-        /* Keşfet Bölümü */
-        .organ-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { padding: 8px 16px; border: none; background: #e0e0e0; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
-        .tab-btn.active-tab { background: var(--accent-color); color: white; transform: scale(1.05); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Keşfet Bölümü Styles */
+        .organ-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .tab-btn.active-tab { background: var(--accent-color); color: white; }
         
         .info-card {
             border-left: 5px solid var(--accent-color);
-            background: #f8f9fa;
+            background: #f9f9f9;
             padding: 20px;
-            border-radius: 0 8px 8px 0;
-            line-height: 1.6;
+            margin-top: 20px;
+            border-radius: 5px;
         }
-        .info-card h3 { color: var(--primary-color); margin-top: 0; }
+        .info-card h3 { color: var(--primary-color); }
 
-        /* Test Bölümü */
-        .quiz-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 20px; background: #f1f2f6; padding: 15px; border-radius: 10px; 
-        }
-        .timer { font-size: 1.3rem; font-weight: bold; color: var(--primary-color); font-family: monospace; }
-        .timer.danger { color: var(--danger-color); animation: pulse 1s infinite; }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .question-box { font-size: 1.15rem; margin-bottom: 25px; font-weight: 600; line-height: 1.4; }
-        .options-grid { display: flex; flex-direction: column; gap: 12px; }
-        
+        /* Test Bölümü Styles */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #eee; padding: 10px; border-radius: 8px; }
+        .timer { font-size: 1.2rem; font-weight: bold; color: var(--danger-color); }
+        .question-box { font-size: 1.2rem; margin-bottom: 20px; font-weight: 600; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .option-btn {
             padding: 15px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #ddd;
             background: white;
             border-radius: 8px;
             cursor: pointer;
             text-align: left;
             transition: 0.2s;
             font-size: 1rem;
-            position: relative;
         }
-        .option-btn:hover:not(.disabled) { border-color: var(--accent-color); background: #f4faff; }
-        
-        /* Doğru/Yanlış Durumları */
+        .option-btn:hover:not(.disabled) { border-color: var(--accent-color); background: #f0f8ff; }
         .correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
         .wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
-        .disabled { pointer-events: none; opacity: 0.9; }
-
-        /* Sonuç Ekranı */
-        .result-screen { text-align: center; padding: 20px; }
-        .score-circle {
-            width: 120px; height: 120px; border-radius: 50%;
-            background: var(--accent-color); color: white;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 2.5rem; margin: 20px auto; font-weight: bold;
-            box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
-        }
-
-        /* Özet Listesi */
-        .summary-list { list-style: none; padding: 0; }
-        .summary-list li { 
-            margin-bottom: 12px; padding: 10px; 
-            border-bottom: 1px solid #eee; line-height: 1.5; 
-        }
+        
+        /* Özet Bölümü Styles */
+        .summary-list li { margin-bottom: 10px; line-height: 1.6; }
         .highlight { color: var(--accent-color); font-weight: bold; }
 
-        /* Genel Butonlar */
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+
         .back-btn {
-            margin-bottom: 15px;
-            padding: 8px 15px;
-            background: #95a5a6;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: var(--text-color);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.9rem;
         }
-        .back-btn:hover { background: #7f8c8d; }
 
-        footer {
-            background: var(--primary-color);
-            color: rgba(255,255,255,0.7);
-            text-align: center;
-            padding: 10px;
-            font-size: 0.8rem;
-            margin-top: auto;
+        /* Result Modal */
+        .result-screen { text-align: center; }
+        .score-circle {
+            width: 150px; height: 150px; border-radius: 50%;
+            background: var(--accent-color); color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2.5rem; margin: 20px auto;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
         }
+
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Duyu Organları</h1>
+        <h1>Duyu Organlarımız ve İşlevleri</h1>
         <h2>Keşfet ve Öğren</h2>
-        <button class="sound-toggle" id="soundBtn" onclick="soundManager.toggleSound()">🔊</button>
     </header>
 
     <div class="container">
@@ -207,45 +168,278 @@
             <div class="menu-grid">
                 <div class="menu-btn" onclick="app.showScreen('kesfet')">
                     <h3>🔬 Keşfet</h3>
-                    <p>Organların yapısını ve görevlerini incele</p>
+                    <p>Göz, kulak, burun, dil ve deri yapılarını detaylı incele.</p>
                 </div>
                 <div class="menu-btn" onclick="app.startQuiz()">
                     <h3>📝 Test Et</h3>
-                    <p>Bilgilerini süreye karşı test et</p>
+                    <p>Bilgilerini süreye karşı yarışarak test et.</p>
                 </div>
                 <div class="menu-btn" onclick="app.showScreen('ozet')">
                     <h3>📚 Özet</h3>
-                    <p>Kritik notlar ve hatırlatmalar</p>
+                    <p>Konunun kritik noktalarını tekrar et.</p>
                 </div>
             </div>
         </div>
 
         <div id="kesfet-screen" class="section">
             <button class="back-btn" onclick="app.goHome()">← Ana Menü</button>
+            <h2 style="text-align:center; color:var(--accent-color);">Organları İncele</h2>
+            
             <div class="organ-tabs">
-                <button class="tab-btn" onclick="app.openTab('goz')">Göz</button>
+                <button class="tab-btn active-tab" onclick="app.openTab('goz')">Göz</button>
                 <button class="tab-btn" onclick="app.openTab('kulak')">Kulak</button>
                 <button class="tab-btn" onclick="app.openTab('burun')">Burun</button>
                 <button class="tab-btn" onclick="app.openTab('dil')">Dil</button>
                 <button class="tab-btn" onclick="app.openTab('deri')">Deri</button>
             </div>
-            <div id="tab-content"></div>
+
+            <div id="tab-content">
+                </div>
         </div>
 
         <div id="test-screen" class="section">
             <div class="quiz-header">
                 <span>Soru: <span id="q-number">1</span>/5</span>
-                <span class="timer" id="time-display">00:30</span>
+                <span class="timer">⏱ <span id="time-display">00:30</span></span>
             </div>
             <div id="quiz-area">
-                <div class="question-box" id="question-text"></div>
-                <div class="options-grid" id="options-area"></div>
+                <div class="question-box" id="question-text">Soru yükleniyor...</div>
+                <div class="options-grid" id="options-area">
+                    </div>
             </div>
         </div>
 
         <div id="result-screen" class="section result-screen">
-            <h2>Test Tamamlandı</h2>
+            <h2>Değerlendirme Sonucu</h2>
             <div class="score-circle" id="final-score">0</div>
-            <p id="feedback-text"></p>
+            <p id="feedback-text">Yorum yükleniyor...</p>
             <button class="menu-btn" onclick="app.goHome()">Ana Menüye Dön</button>
         </div>
+
+        <div id="ozet-screen" class="section">
+            <button class="back-btn" onclick="app.goHome()">← Ana Menü</button>
+            <h2 style="color: var(--primary-color); border-bottom: 2px solid #ddd; padding-bottom: 10px;">AYT Biyoloji Kritik Notlar</h2>
+            <ul class="summary-list">
+                <li><span class="highlight">Göz Uyumu:</span> Uzaktaki ve yakındaki cisimlere bakarken mercek kalınlığının değişerek görüntünün retinaya düşürülmesidir.</li>
+                <li><span class="highlight">Sarı Benek (Makula):</span> Gözde koni reseptörlerinin en yoğun olduğu ve görüntünün en net oluştuğu bölgedir.</li>
+                <li><span class="highlight">Corti Organı:</span> İşitme reseptörlerinin bulunduğu esas işitme organıdır, salyangoz kanalında bulunur.</li>
+                <li><span class="highlight">Yarım Daire Kanalları:</span> İşitme ile ilgili değildir, dönme hareketi ile dengeyi sağlar (Ampulla).</li>
+                <li><span class="highlight">Kemoseseptörler:</span> Hem burun hem de dilde bulunur. Maddelerin suda/mukusta çözünmesi gerekir.</li>
+                <li><span class="highlight">Adaptasyon:</span> Burundaki koku reseptörleri çabuk yorulur, buna koku adaptasyonu denir.</li>
+                <li><span class="highlight">Deri Reseptörleri:</span> Üst deride (Epidermis) kan damarı ve sinir bulunmaz (korun tabakası hariç). Reseptörler Dermis tabakasındadır.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <footer>
+        Tasarım: Naci KARHAN
+    </footer>
+
+    <script>
+        const app = {
+            state: {
+                currentScreen: 'menu',
+                score: 0,
+                currentQuestionIndex: 0,
+                timer: null,
+                timeLeft: 30
+            },
+
+            // Biyoloji İçeriği (Keşfet)
+            contentData: {
+                goz: {
+                    title: "👁️ Göz ve Görme",
+                    text: "Işığı algılayan fotoreseptörler retinada bulunur. <b>Koni hücreleri</b> renkli ve net görmeyi, <b>Çubuk hücreleri</b> az ışıkta siyah-beyaz görmeyi sağlar. Görüntü retinada ters oluşur, beyinde düzeltilir."
+                },
+                kulak: {
+                    title: "👂 Kulak ve İşitme/Denge",
+                    text: "Kulak hem işitme hem denge organıdır. <b>Salyangoz (Cochlea)</b> işitmeyi sağlar. <b>Yarım daire kanalları</b>, kesecik ve tulumcuk ise dengeyi (statik ve dinamik denge) sağlar."
+                },
+                burun: {
+                    title: "👃 Burun ve Koku",
+                    text: "Koku reseptörleri burun boşluğunun üst kısmında <b>Sarı Bölge</b>'de bulunur. Koku duyusu talamusa uğramadan doğrudan beyin kabuğuna giden tek duyudur. Çabuk yorulur (adaptasyon)."
+                },
+                dil: {
+                    title: "👅 Dil ve Tat",
+                    text: "Tat tomurcukları (Papilla) içinde kemoreseptörler bulunur. Bir maddenin tadının alınabilmesi için sıvıda çözünmesi gerekir. Koku ve tat duyusu birbirine entegre çalışır."
+                },
+                deri: {
+                    title: "✋ Deri ve Dokunma",
+                    text: "Mekanoreseptörler, termoreseptörler ve ağrı reseptörleri bulunur. <b>Epidermis</b> (üst deri) korun ve malpighi tabakasından oluşur. <b>Dermis</b> (alt deri) canlıdır, reseptörler buradadır."
+                }
+            },
+
+            // Test Soruları (AYT Odaklı)
+            questions: [
+                {
+                    q: "Aşağıdakilerden hangisi işitme olayında görev alan Corti organının bulunduğu kısımdır?",
+                    options: ["Tulumcuk", "Kesecik", "Salyangoz (Kohlea)", "Yarım Daire Kanalları"],
+                    correct: 2
+                },
+                {
+                    q: "Gözde görüntünün netliğinin sağlanması için göz merceğinin kalınlığını değiştirmesine ne ad verilir?",
+                    options: ["Göz Tansiyonu", "Göz Uyumu", "Miyopi", "Katarakt"],
+                    correct: 1
+                },
+                {
+                    q: "Koku duyusu ile ilgili olarak, impulslar beyin kabuğuna giderken aşağıdaki yapıların hangisinden geçmez?",
+                    options: ["Limbik Sistem", "Talamus", "Koku Soğancığı", "Reseptörler"],
+                    correct: 1
+                },
+                {
+                    q: "Derinin yapısı incelendiğinde, kan damarları ve sinirlerin bulunmadığı tabaka hangisidir?",
+                    options: ["Dermis", "Malpighi Tabakası", "Korun Tabakası (Epidermis üstü)", "Yağ Tabakası"],
+                    correct: 2
+                },
+                {
+                    q: "İç kulaktaki Yarım Daire Kanalları'nın temel görevi nedir?",
+                    options: ["Ses dalgalarını toplamak", "Dönme hareketiyle oluşan dengeyi sağlamak", "Orta kulak basıncını ayarlamak", "Ses titreşimlerini güçlendirmek"],
+                    correct: 1
+                }
+            ],
+
+            init: function() {
+                this.openTab('goz');
+            },
+
+            showScreen: function(screenName) {
+                document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+                document.getElementById(screenName + '-screen').classList.add('active');
+            },
+
+            goHome: function() {
+                this.stopTimer();
+                this.showScreen('menu');
+            },
+
+            // Keşfet Bölümü Mantığı
+            openTab: function(organ) {
+                const data = this.contentData[organ];
+                const contentDiv = document.getElementById('tab-content');
+                
+                // Tab butonlarını güncelle
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+                event.target.classList.add('active-tab');
+
+                contentDiv.innerHTML = `
+                    <div class="info-card">
+                        <h3>${data.title}</h3>
+                        <p>${data.text}</p>
+                        <div style="background:#eef; padding:10px; border-radius:5px; margin-top:10px; font-size:0.9rem;">
+                            <em>💡 İpucu: AYT'de bu organın reseptör çeşitlerini unutma!</em>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // Test Bölümü Mantığı
+            startQuiz: function() {
+                this.state.score = 0;
+                this.state.currentQuestionIndex = 0;
+                this.showScreen('test');
+                this.loadQuestion();
+            },
+
+            loadQuestion: function() {
+                if (this.state.currentQuestionIndex >= this.questions.length) {
+                    this.finishQuiz();
+                    return;
+                }
+
+                this.resetTimer();
+                const q = this.questions[this.state.currentQuestionIndex];
+                
+                document.getElementById('q-number').innerText = this.state.currentQuestionIndex + 1;
+                document.getElementById('question-text').innerText = q.q;
+                
+                const optionsHtml = q.options.map((opt, index) => 
+                    `<button class="option-btn" onclick="app.checkAnswer(${index}, this)">${opt}</button>`
+                ).join('');
+                
+                document.getElementById('options-area').innerHTML = optionsHtml;
+            },
+
+            checkAnswer: function(selectedIndex, btnElement) {
+                // Tıklamayı engelle
+                const allBtns = document.querySelectorAll('.option-btn');
+                allBtns.forEach(btn => btn.classList.add('disabled'));
+                this.stopTimer();
+
+                const currentQ = this.questions[this.state.currentQuestionIndex];
+                
+                if (selectedIndex === currentQ.correct) {
+                    btnElement.classList.add('correct');
+                    this.state.score += 20; // Her soru 20 puan
+                } else {
+                    btnElement.classList.add('wrong');
+                    // Doğruyu göster
+                    allBtns[currentQ.correct].classList.add('correct');
+                }
+
+                // Biraz bekle sonra diğer soruya geç
+                setTimeout(() => {
+                    this.state.currentQuestionIndex++;
+                    this.loadQuestion();
+                }, 1500);
+            },
+
+            finishQuiz: function() {
+                this.showScreen('result');
+                document.getElementById('final-score').innerText = this.state.score;
+                
+                let feedback = "";
+                if(this.state.score === 100) feedback = "Mükemmel! Fenotipin harika görünüyor! 🧬";
+                else if(this.state.score >= 80) feedback = "Çok iyi! Sinapsların ateş ediyor! 🔥";
+                else if(this.state.score >= 60) feedback = "Fena değil, biraz daha tekrarla nöronları güçlendir.";
+                else feedback = "Konuyu tekrar 'Keşfet' bölümünden incelemelisin.";
+                
+                document.getElementById('feedback-text').innerText = feedback;
+            },
+
+            // Timer Mantığı
+            resetTimer: function() {
+                this.stopTimer();
+                this.state.timeLeft = 30; // Her soru 30 saniye
+                this.updateTimerDisplay();
+                
+                this.state.timer = setInterval(() => {
+                    this.state.timeLeft--;
+                    this.updateTimerDisplay();
+                    
+                    if (this.state.timeLeft <= 0) {
+                        this.stopTimer();
+                        // Süre doldu, otomatik yanlış say ve geç
+                        const allBtns = document.querySelectorAll('.option-btn');
+                        allBtns.forEach(btn => btn.classList.add('disabled'));
+                        
+                        // Doğru cevabı göster
+                        const currentQ = this.questions[this.state.currentQuestionIndex];
+                        allBtns[currentQ.correct].classList.add('correct');
+
+                        setTimeout(() => {
+                            this.state.currentQuestionIndex++;
+                            this.loadQuestion();
+                        }, 1500);
+                    }
+                }, 1000);
+            },
+
+            stopTimer: function() {
+                if (this.state.timer) clearInterval(this.state.timer);
+            },
+
+            updateTimerDisplay: function() {
+                const min = Math.floor(this.state.timeLeft / 60);
+                const sec = this.state.timeLeft % 60;
+                document.getElementById('time-display').innerText = 
+                    `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+            }
+        };
+
+        // Uygulamayı Başlat
+        app.init();
+
+    </script>
+</body>
+</html>
