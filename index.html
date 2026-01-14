@@ -32,10 +32,31 @@
             padding: 20px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
         }
 
         header h1 { margin: 0; font-size: 2.2rem; }
         header h2 { margin: 5px 0 0; font-size: 1.2rem; font-weight: 300; opacity: 0.9; }
+
+        /* Ses Kontrol Butonu */
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: 0.3s;
+        }
+        .sound-toggle:hover { background: rgba(255,255,255,0.4); }
 
         /* Main Container */
         .container {
@@ -155,11 +176,10 @@
 
     </style>
 </head>
-<body>
-
-    <header>
+<body onclick="soundManager.initAudioContext()"> <header>
         <h1>Duyu Organlarımız ve İşlevleri</h1>
         <h2>Keşfet ve Öğren</h2>
+        <button class="sound-toggle" onclick="soundManager.toggleSound()" title="Sesi Aç/Kapa">🔊</button>
     </header>
 
     <div class="container">
@@ -237,6 +257,60 @@
     </footer>
 
     <script>
+        // --- SES YÖNETİCİSİ (Web Audio API) ---
+        const soundManager = {
+            audioCtx: null,
+            isMuted: false,
+
+            initAudioContext: function() {
+                if (!this.audioCtx) {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+
+            toggleSound: function() {
+                this.isMuted = !this.isMuted;
+                const btn = document.querySelector('.sound-toggle');
+                btn.innerHTML = this.isMuted ? '🔇' : '🔊';
+            },
+
+            playTone: function(freq, type, duration) {
+                if (this.isMuted || !this.audioCtx) return;
+                
+                const osc = this.audioCtx.createOscillator();
+                const gainNode = this.audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.value = freq;
+                
+                osc.connect(gainNode);
+                gainNode.connect(this.audioCtx.destination);
+
+                osc.start();
+                
+                // Sesi yumuşakça bitir
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, this.audioCtx.currentTime + duration);
+                osc.stop(this.audioCtx.currentTime + duration);
+            },
+
+            playCorrect: function() {
+                // Pozitif "Ding" efekti (Arpej)
+                this.playTone(600, 'sine', 0.1);
+                setTimeout(() => this.playTone(800, 'sine', 0.2), 100);
+            },
+
+            playWrong: function() {
+                // Negatif "Buzzer" efekti
+                this.playTone(150, 'sawtooth', 0.4);
+                setTimeout(() => this.playTone(100, 'sawtooth', 0.4), 100);
+            },
+
+            playTick: function() {
+                // Kısa tık sesi
+                this.playTone(800, 'square', 0.05);
+            }
+        };
+
         const app = {
             state: {
                 currentScreen: 'menu',
@@ -335,6 +409,7 @@
 
             // Test Bölümü Mantığı
             startQuiz: function() {
+                soundManager.initAudioContext(); // Ses motorunu garantiye al
                 this.state.score = 0;
                 this.state.currentQuestionIndex = 0;
                 this.showScreen('test');
@@ -370,14 +445,15 @@
                 
                 if (selectedIndex === currentQ.correct) {
                     btnElement.classList.add('correct');
-                    this.state.score += 20; // Her soru 20 puan
+                    soundManager.playCorrect(); // SES EKLENDİ
+                    this.state.score += 20; 
                 } else {
                     btnElement.classList.add('wrong');
+                    soundManager.playWrong(); // SES EKLENDİ
                     // Doğruyu göster
                     allBtns[currentQ.correct].classList.add('correct');
                 }
 
-                // Biraz bekle sonra diğer soruya geç
                 setTimeout(() => {
                     this.state.currentQuestionIndex++;
                     this.loadQuestion();
@@ -389,57 +465,13 @@
                 document.getElementById('final-score').innerText = this.state.score;
                 
                 let feedback = "";
-                if(this.state.score === 100) feedback = "Mükemmel! Fenotipin harika görünüyor! 🧬";
+                if(this.state.score === 100) {
+                    feedback = "Mükemmel! Fenotipin harika görünüyor! 🧬";
+                    soundManager.playCorrect();
+                }
                 else if(this.state.score >= 80) feedback = "Çok iyi! Sinapsların ateş ediyor! 🔥";
                 else if(this.state.score >= 60) feedback = "Fena değil, biraz daha tekrarla nöronları güçlendir.";
-                else feedback = "Konuyu tekrar 'Keşfet' bölümünden incelemelisin.";
-                
-                document.getElementById('feedback-text').innerText = feedback;
-            },
-
-            // Timer Mantığı
-            resetTimer: function() {
-                this.stopTimer();
-                this.state.timeLeft = 30; // Her soru 30 saniye
-                this.updateTimerDisplay();
-                
-                this.state.timer = setInterval(() => {
-                    this.state.timeLeft--;
-                    this.updateTimerDisplay();
-                    
-                    if (this.state.timeLeft <= 0) {
-                        this.stopTimer();
-                        // Süre doldu, otomatik yanlış say ve geç
-                        const allBtns = document.querySelectorAll('.option-btn');
-                        allBtns.forEach(btn => btn.classList.add('disabled'));
-                        
-                        // Doğru cevabı göster
-                        const currentQ = this.questions[this.state.currentQuestionIndex];
-                        allBtns[currentQ.correct].classList.add('correct');
-
-                        setTimeout(() => {
-                            this.state.currentQuestionIndex++;
-                            this.loadQuestion();
-                        }, 1500);
-                    }
-                }, 1000);
-            },
-
-            stopTimer: function() {
-                if (this.state.timer) clearInterval(this.state.timer);
-            },
-
-            updateTimerDisplay: function() {
-                const min = Math.floor(this.state.timeLeft / 60);
-                const sec = this.state.timeLeft % 60;
-                document.getElementById('time-display').innerText = 
-                    `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
-            }
-        };
-
-        // Uygulamayı Başlat
-        app.init();
-
-    </script>
-</body>
-</html>
+                else {
+                    feedback = "Konuyu tekrar 'Keşfet' bölümünden incelemelisin.";
+                    soundManager.playWrong();
+                }
